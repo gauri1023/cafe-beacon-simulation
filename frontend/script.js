@@ -31,9 +31,34 @@ function hideOffer() {
 const BEACON_RANGE = 10; // metres
  
 // ===== Member 3 (Backend): connect to Flask API here =====
-// Placeholder offer until the API is ready.
-// Later: const res = await fetch('http://127.0.0.1:5000/api/offer/CAFE001');
+const BEACON_ID = 'CAFE001';
+const API_URL = `http://127.0.0.1:5000/api/offer/${BEACON_ID}`;
 let currentOffer = 'Welcome! Get 20% OFF on Coffee!';
+
+// Fetch offer from Flask backend
+async function fetchOfferFromBackend() {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) {
+      throw new Error(`HTTP status ${res.status}`);
+    }
+    const data = await res.json();
+    if (data.offer) {
+      currentOffer = data.offer;
+    } else if (data.offer_text) {
+      currentOffer = data.offer_text;
+    }
+    const d = Number(slider.value);
+    if (d <= BEACON_RANGE) {
+      showOffer(currentOffer);
+    }
+  } catch (error) {
+    console.warn('Backend connection failed, using default offer:', error);
+  }
+}
+
+fetchOfferFromBackend();
+
  
 slider.addEventListener('input', () => {
   const d = Number(slider.value);
@@ -41,4 +66,6 @@ slider.addEventListener('input', () => {
   if (d <= BEACON_RANGE) showOffer(currentOffer);
   else hideOffer();
 });
+ 
+
  
